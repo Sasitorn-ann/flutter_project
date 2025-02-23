@@ -1,0 +1,109 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'CRUD Operations',
+      home: ItemListScreen(),
+    );
+  }
+}
+
+class ItemListScreen extends StatefulWidget {
+  @override
+  _ItemListScreenState createState() => _ItemListScreenState();
+}
+
+class _ItemListScreenState extends State<ItemListScreen> {
+  List<String> items = [];
+  TextEditingController controller = TextEditingController();
+
+  void _addItem(String item) {
+    setState(() {
+      items.add(item);
+    });
+  }
+
+  void _editItem(int index, String newItem) {
+    setState(() {
+      items[index] = newItem;
+    });
+  }
+
+  void _deleteItem(int index) {
+    setState(() {
+      items.removeAt(index);
+    });
+  }
+
+  void _showDialog({String? initialText, int? index}) {
+    controller.text = initialText ?? '';
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(index == null ? 'Add Item' : 'Edit Item'),
+          content: TextField(controller: controller),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                if (controller.text.isNotEmpty) {
+                  if (index == null) {
+                    _addItem(controller.text);
+                  } else {
+                    _editItem(index, controller.text);
+                  }
+                  Navigator.of(context).pop();
+                }
+              },
+              child: Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('CRUD Operations')),
+      body: ListView.builder(
+        itemCount: items.length,
+        itemBuilder: (context, index) {
+          return ListTile(
+            title: Text(items[index]),
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.edit),
+                  onPressed: () => _showDialog(initialText: items[index], index: index),
+                ),
+                IconButton(
+                  icon: Icon(Icons.delete),
+                  onPressed: () => _deleteItem(index),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.add),
+        onPressed: () => _showDialog(),
+      ),
+    );
+  }
+}
