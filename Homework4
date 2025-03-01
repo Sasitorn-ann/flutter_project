@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -21,22 +22,62 @@ class TrafficLightScreen extends StatefulWidget {
 
 class _TrafficLightScreenState extends State<TrafficLightScreen> {
   int _currentLight = 0;
+  int _countdown = 5;
+  late Timer _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _startCountdown();
+  }
+
+  void _startCountdown() {
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      setState(() {
+        if (_countdown > 1) {
+          _countdown--;
+        } else {
+          _changeLight();
+        }
+      });
+    });
+  }
 
   void _changeLight() {
     setState(() {
-      _currentLight = (_currentLight + 1) % 3; // วนลูป 0 -> 1 -> 2 -> 0
+      _currentLight = (_currentLight + 1) % 3; //
+      _countdown = 10;
     });
   }
 
   double _getOpacity(int lightIndex) {
-    return _currentLight == lightIndex ? 1.0 : 0.3; // ไฟที่เปิดเต็ม 1.0 ที่เหลือจาง 0.3
+    return _currentLight == lightIndex ? 1.0 : 0.3; //
+  }
+
+  Color _getLightColor(int lightIndex) {
+    switch (lightIndex) {
+      case 0:
+        return Colors.red;
+      case 1:
+        return Colors.yellow;
+      case 2:
+        return Colors.green;
+      default:
+        return Colors.black;
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel(); //
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Center( // ทำให้ข้อความอยู่ตรงกลาง
+        title: Center(
           child: Text('Traffic Light Animation'),
         ),
       ),
@@ -62,9 +103,13 @@ class _TrafficLightScreenState extends State<TrafficLightScreen> {
               child: _buildLight(Colors.green),
             ),
             SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _changeLight,
-              child: Text('เปลี่ยนไฟ'),
+            Text(
+              '$_countdown',
+              style: TextStyle(
+                fontSize: 40,
+                fontWeight: FontWeight.bold,
+                color: _getLightColor(_currentLight),
+              ),
             ),
           ],
         ),
